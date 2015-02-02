@@ -1,9 +1,6 @@
 package com.github.lemniscate.spring.jsonviews.hooks;
 
-import com.github.lemniscate.spring.jsonviews.client.BaseView;
-import com.github.lemniscate.spring.jsonviews.client.DataView;
-import com.github.lemniscate.spring.jsonviews.client.DataViewImpl;
-import com.github.lemniscate.spring.jsonviews.client.ResponseView;
+import com.github.lemniscate.spring.jsonviews.client.*;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -11,13 +8,13 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * @Author dave 1/28/15 1:07 PM
+ * @Author dave 2/1/15 1:46 PM
  */
-public class ViewInjectingReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class JsonViewInjectingReturnValueHandler implements HandlerMethodReturnValueHandler {
 
     private final HandlerMethodReturnValueHandler delegate;
 
-    public ViewInjectingReturnValueHandler(HandlerMethodReturnValueHandler delegate) {
+    public JsonViewInjectingReturnValueHandler(HandlerMethodReturnValueHandler delegate) {
         this.delegate = delegate;
     }
 
@@ -27,12 +24,14 @@ public class ViewInjectingReturnValueHandler implements HandlerMethodReturnValue
     }
 
     @Override
-    public void handleReturnValue(Object returnValue,
-                                  MethodParameter returnType, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest) throws Exception {
-
+    public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
         Class<? extends BaseView> viewClass = getDeclaredViewClass(returnType);
-        if (viewClass != null){
+
+        if( JsonViewResponseEntity.class.isAssignableFrom(returnValue.getClass()) ){
+            JsonViewResponseEntity f = (JsonViewResponseEntity) returnValue;
+            DataView<?> dv = f.getDataView();
+            returnValue = new ResponseEntity(dv, f.getHeaders(), f.getStatusCode());
+        }else if(viewClass != null){
             returnValue = wrapResult(returnValue,viewClass, returnType, returnValue);
         }
 
@@ -63,4 +62,5 @@ public class ViewInjectingReturnValueHandler implements HandlerMethodReturnValue
         DataView response = new DataViewImpl(result, viewClass);
         return response;
     }
+
 }

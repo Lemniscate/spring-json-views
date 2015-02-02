@@ -7,18 +7,21 @@ import org.springframework.util.MultiValueMap;
 /**
  * @Author dave 1/28/15 1:13 PM
  */
-public class JsonViewResponseEntity<T> extends ResponseEntity<DataView<T>> {
+public class JsonViewResponseEntity<T> extends ResponseEntity<T> {
 
-    private final Class<? extends BaseView> view;
+    private final DataView<T> dataView;
 
     public JsonViewResponseEntity(Class<? extends BaseView> view, T body, HttpStatus statusCode) {
-        super(new DataViewImpl<T>(body, view), statusCode);
-        this.view = view;
+        this(view, body, null, statusCode);
     }
 
     public JsonViewResponseEntity(Class<? extends BaseView> view, T body, MultiValueMap<String, String> headers, HttpStatus statusCode) {
-        super(new DataViewImpl<T>(body, view), headers, statusCode);
-        this.view = view;
+        super(body, headers, statusCode);
+        this.dataView = new DataViewImpl<T>(getBody(),view);
+    }
+
+    public DataView<T> getDataView() {
+        return dataView;
     }
 
 }

@@ -43,11 +43,12 @@ public class JsonViewHandlerDecorator implements InitializingBean {
     private void decorateHandlers(List<HandlerMethodReturnValueHandler> handlers) {
         for (HandlerMethodReturnValueHandler handler : handlers) {
             if ( processorsToDecorate.contains(handler.getClass()) ) {
-                ViewInjectingReturnValueHandler decorator = new ViewInjectingReturnValueHandler(handler);
+                JsonViewInjectingReturnValueHandler decorator = new JsonViewInjectingReturnValueHandler(handler);
                 int index = handlers.indexOf(handler);
                 handlers.set(index, decorator);
                 log.info("JsonView processor decorator wired up for " + handler.getClass().getSimpleName());
             }
         }
     }
+
 }
