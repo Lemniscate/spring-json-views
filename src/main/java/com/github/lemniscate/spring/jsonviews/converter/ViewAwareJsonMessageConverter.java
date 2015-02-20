@@ -1,13 +1,14 @@
 package com.github.lemniscate.spring.jsonviews.converter;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.github.lemniscate.spring.jsonviews.client.BaseView;
 import com.github.lemniscate.spring.jsonviews.client.DataView;
+import com.github.lemniscate.spring.jsonviews.struct.BaseViewResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.Link;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -48,7 +49,13 @@ public class ViewAwareJsonMessageConverter extends MappingJackson2HttpMessageCon
             Object body = view.getData();
 
             if( body instanceof Resource){
-                body = new BaseViewResource((Resource) body);
+                body = BaseViewResource.from((Resource) body);
+            }
+
+            if( Page.class.isAssignableFrom(body.getClass()) ){
+                Page<?> page = (Page<?>) body;
+                Pageable p = new PageRequest(page.getNumber(), page.getSize());
+                body = new BaseViewResource.BaseViewPageImpl(page.getContent(), p, page.getTotalElements());
             }
 
             writer.writeValue(outputMessage.getBody(), body);
@@ -73,24 +80,7 @@ public class ViewAwareJsonMessageConverter extends MappingJackson2HttpMessageCon
     }
 
 
-    public static class BaseViewResource extends Resource{
 
-        public BaseViewResource(Resource resource) {
-            super(resource.getContent(), resource.getLinks());
-        }
-
-        @JsonView(BaseView.class)
-        @Override
-        public List<Link> getLinks() {
-            return super.getLinks();
-        }
-
-        @JsonView(BaseView.class)
-        @Override
-        public Object getContent() {
-            return super.getContent();
-        }
-    }
 
 }
 
