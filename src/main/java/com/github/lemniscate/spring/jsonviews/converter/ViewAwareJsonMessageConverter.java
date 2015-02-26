@@ -49,7 +49,8 @@ public class ViewAwareJsonMessageConverter extends MappingJackson2HttpMessageCon
             Object body = view.getData();
 
             if( body instanceof Resource){
-                body = BaseViewResource.from((Resource) body);
+                Resource res = (Resource) body;
+                body = new BaseViewResource(res.getContent(), res.getLinks());
             }
 
             if( Page.class.isAssignableFrom(body.getClass()) ){
