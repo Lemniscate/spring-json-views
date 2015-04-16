@@ -21,6 +21,14 @@ import java.util.List;
  */
 public class BaseViewResource<T> extends Resource<T> {
 
+    /**
+     * You should NEVER use this; It exists purely to help serialization.
+     */
+    @Deprecated
+    public BaseViewResource(){
+        super(null);
+    }
+
     public BaseViewResource(T content, List<Link> links) {
         super(content, convertLinks(links) );
     }
