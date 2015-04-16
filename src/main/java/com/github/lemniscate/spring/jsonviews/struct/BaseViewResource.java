@@ -1,12 +1,17 @@
 package com.github.lemniscate.spring.jsonviews.struct;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.lemniscate.spring.jsonviews.client.BaseView;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +39,11 @@ public class BaseViewResource<T> extends Resource<T> {
         return result;
     }
 
+    // TODO look at {@link ResourceSupportMixin} and refactor these out?
+    @XmlElement(name = "link")
+    @JsonProperty("_links")
+    @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY, using = Jackson2HalModule.HalLinkListSerializer.class)
+    @JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
     @JsonView(BaseView.class)
     @Override
     public List<Link> getLinks() {
